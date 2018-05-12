@@ -22,10 +22,10 @@
   "author": "Akos Szokodi <akos@codingsans.com> (http://codingsans.com)",
   "license": "MIT",
   "dependencies": {
+    "@types/mongoose": "5.0.10",
     "lodash": "4.17.10"
   },
   "peerDependencies": {
-    "@types/mongoose": "5.0.10",
     "mongoose": "^5.0.0",
     "reflect-metadata": "^0.1.8"
   },
