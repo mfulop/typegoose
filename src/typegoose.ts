@@ -1,4 +1,5 @@
 import 'reflect-metadata';
+import 'mongoose-schema-extend';
 import * as mongoose from 'mongoose';
 import * as _ from 'lodash';
 
@@ -19,19 +20,30 @@ export interface GetModelForClassOptions {
   existingMongoose?: mongoose.Mongoose;
   schemaOptions?: mongoose.SchemaOptions;
   existingConnection?: mongoose.Connection;
+  mongooseSchemaExtend?: boolean;
 }
 
 export class Typegoose {
-  getModelForClass<T>(t: T, { existingMongoose, schemaOptions, existingConnection }: GetModelForClassOptions = {}) {
+  getModelForClass<T>(t: T, {
+    existingMongoose,
+    schemaOptions,
+    existingConnection,
+    mongooseSchemaExtend,
+  }: GetModelForClassOptions = {}) {
     const name = this.constructor.name;
     if (!models[name]) {
-      this.setModelForClass(t, { existingMongoose, schemaOptions, existingConnection });
+      this.setModelForClass(t, { existingMongoose, schemaOptions, existingConnection, mongooseSchemaExtend });
     }
 
     return models[name] as ModelType<this> & T;
   }
 
-  setModelForClass<T>(t: T, { existingMongoose, schemaOptions, existingConnection }: GetModelForClassOptions = {}) {
+  setModelForClass<T>(t: T, {
+    existingMongoose,
+    schemaOptions,
+    existingConnection,
+    mongooseSchemaExtend,
+  }: GetModelForClassOptions = {}) {
     const name = this.constructor.name;
 
     // get schema of current model
@@ -41,7 +53,7 @@ export class Typegoose {
     // iterate trough all parents
     while (parentCtor && parentCtor.name !== 'Typegoose' && parentCtor.name !== 'Object') {
       // extend schema
-      sch = this.buildSchema(parentCtor.name, schemaOptions, sch);
+      sch = this.buildSchema(parentCtor.name, schemaOptions, sch, mongooseSchemaExtend);
       // next parent
       parentCtor = Object.getPrototypeOf(parentCtor.prototype).constructor;
     }
@@ -59,7 +71,7 @@ export class Typegoose {
     return models[name] as ModelType<this> & T;
   }
 
-  private buildSchema(name: string, schemaOptions, sch?: mongoose.Schema) {
+  private buildSchema(name: string, schemaOptions, sch?: mongoose.Schema, mongooseSchemaExtend?: boolean) {
     const Schema = mongoose.Schema;
 
     if (!sch) {
@@ -67,7 +79,11 @@ export class Typegoose {
         new Schema(schema[name], schemaOptions) :
         new Schema(schema[name]);
     } else {
-      sch.add(schema[name]);
+      if (mongooseSchemaExtend) {
+        sch = sch.extend(schema[name]);
+      } else {
+        sch.add(schema[name]);
+      }
     }
 
     const staticMethods = methods.staticMethods[name];

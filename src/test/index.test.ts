@@ -1,6 +1,7 @@
 import * as _ from 'lodash';
 import { expect } from 'chai';
 import * as mongoose from 'mongoose';
+import * as tg from '../typegoose';
 
 import { model as User, User as UserType } from './models/user';
 import { model as Car, Car as CarType } from './models/car';
@@ -8,6 +9,7 @@ import { model as Person, PersistentModel } from './models/person';
 import { PersonNested, AddressNested, PersonNestedModel } from './models/nested-object';
 import { Genders } from './enums/genders';
 import { Role } from './enums/role';
+import { DogModel, GermanShepherdModel, GermanShepherd, Dog } from './models/animals';
 import { initDatabase, closeDatabase } from './utils/mongoConnect';
 import { getClassForDocument } from '../utils';
 import { Decimal128 } from 'bson';
@@ -170,6 +172,24 @@ describe('Typegoose', () => {
       expect(prevJob.startedAt).to.be.ok;
     });
   });
+
+  it('should save mongoose-schema-extend classes under one collection with _type', async () => {
+      const germanShepherd = new GermanShepherdModel({ tailLength: 4, furColor: 'blue' });
+      await germanShepherd.save();
+      expect(germanShepherd._type).to.equal('GermanShepherd');
+
+      const dogs: tg.InstanceType<GermanShepherd> = await GermanShepherdModel.findOne({ tailLength: 4 });
+
+      expect(dogs.getSound());
+  });
+
+  it('should use the extended instance method', async () => {
+    const germanShepherd = new GermanShepherdModel({ tailLength: 4, furColor: 'blue' });
+    await germanShepherd.save();
+    const dog: tg.InstanceType<GermanShepherd | Dog> = await GermanShepherdModel.findOne({ tailLength: 4 });
+
+    expect(dog.getSound()).to.equal('im a shepherd');
+});
 });
 
 describe('getClassForDocument()', () => {
