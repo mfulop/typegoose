@@ -1,9 +1,10 @@
 import { model as Hook } from './hooktestModel';
 import { model as Dummy } from './dummy';
-import { initDatabase } from '__tests__/utils/mongoConnect';
+import { initDatabase, closeDatabase } from '__tests__/utils/mongoConnect';
 
 describe('Hooks', () => {
   beforeEach(() => initDatabase());
+  afterEach(() => closeDatabase());
 
   it('should update the property using isModified during pre save hook', async () => {
     const hook = await Hook.create({

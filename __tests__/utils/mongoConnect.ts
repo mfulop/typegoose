@@ -14,4 +14,4 @@ export const initDatabase = () =>
   connect().then(() => mongoose.connection.db.dropDatabase());
 
 export const closeDatabase = () =>
-  mongoose.connection.close();
+   mongoose.connection.close();

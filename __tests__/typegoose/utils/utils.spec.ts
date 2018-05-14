@@ -7,8 +7,7 @@ import { initDatabase, closeDatabase } from '__tests__/utils/mongoConnect';
 import { Decimal128 } from 'bson';
 import * as mongoose from 'mongoose';
 import { getClassForDocument } from 'src/utils';
-import * as _ from 'lodash'
-
+import * as _ from 'lodash';
 
 describe('utils', () => {
   beforeEach(() => initDatabase());
@@ -57,7 +56,7 @@ describe('utils', () => {
 
     expect(user.cars.length).toBeGreaterThan(0);
     _.map(user.cars, (currentCar: CarType) => {
-      expect(currentCar.model).toBeTruthy()
+      expect(currentCar.model).toBeTruthy();
     });
 
     // verify methods
@@ -76,7 +75,7 @@ describe('utils', () => {
 
     const person = await PersonNestedModel.create(personInput);
 
-    expect(person).toBeDefined()
+    expect(person).toBeDefined();
     expect(person.name).toEqual('Person, Some');
     expect(person.address).toBeDefined();
     expect(person.address.street).toEqual('A Street 1');

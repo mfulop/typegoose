@@ -6,12 +6,12 @@ import { initDatabase, closeDatabase } from '__tests__/utils/mongoConnect';
 import { Decimal128 } from 'bson';
 import * as mongoose from 'mongoose';
 import { getClassForDocument } from 'src/utils';
-import * as _ from 'lodash'
+import * as _ from 'lodash';
 import { DogModel, GermanShepherdModel, GermanShepherd, Dog } from '__tests__/models/animals';
 import { Genders } from '__tests__/enums/genders';
 import { Role } from '__tests__/enums/role';
 import { InstanceType } from 'src/typegoose';
-import 'jest-extended'
+import 'jest-extended';
 
 describe('Typegoose', () => {
   beforeEach(() => initDatabase());
@@ -72,17 +72,17 @@ describe('Typegoose', () => {
       expect(foundUser.role).toEqual(Role.User);
       expect(foundUser.job).toBeDefined();
       expect(foundUser.car).toBeDefined();
-      expect(foundUser.languages).toHaveLength(2)
+      expect(foundUser.languages).toHaveLength(2);
       expect(foundUser.languages).toIncludeAllMembers(['english', 'typescript']);
       expect(foundUser.job.title).toEqual('Developer');
       expect(foundUser.job.position).toEqual('Lead');
       expect(foundUser.job.startedAt).toBeNumber();
-      expect(foundUser.job.jobType).not.toHaveProperty('_id')
+      expect(foundUser.job.jobType).not.toHaveProperty('_id');
       expect(foundUser.job.jobType.salary).toEqual(5000);
       expect(foundUser.job.jobType.field).toEqual('IT');
       expect(foundUser.job.jobType.salary).toBeNumber();
       expect((foundUser.car as CarType).model).toEqual('Tesla');
-      expect(foundUser.previousJobs).toHaveLength(2)
+      expect(foundUser.previousJobs).toHaveLength(2);
 
       expect(foundUser.fullName).toEqual('John Doe');
 
@@ -90,7 +90,7 @@ describe('Typegoose', () => {
       expect(janitor.title).toEqual('Janitor');
       expect(manager.title).toEqual('Manager');
 
-      expect(foundUser.previousCars).toHaveLength(2)
+      expect(foundUser.previousCars).toHaveLength(2);
       const [foundTrabant, foundZastava] =
         _.sortBy(foundUser.previousCars, (previousCar) => (previousCar as CarType).model);
       expect((foundTrabant as CarType).model).toEqual('Trabant');
@@ -119,9 +119,9 @@ describe('Typegoose', () => {
         gender: Genders.FEMALE,
       });
 
-      expect(createdUser).toBeTruthy()
+      expect(createdUser).toBeTruthy();
       expect(createdUser).toHaveProperty('created');
-      expect(createdUser.created).toEqual(true)
+      expect(createdUser.created).toEqual(true);
       expect(createdUser).toHaveProperty('doc');
       expect(createdUser.doc.firstName).toEqual('Jane');
 
@@ -130,12 +130,13 @@ describe('Typegoose', () => {
         lastName: 'Doe',
       });
 
-      expect(foundUser).toBeTruthy()
+      expect(foundUser).toBeTruthy();
       expect(foundUser).toHaveProperty('created');
-      expect(foundUser.created).toEqual(false)
+      expect(foundUser.created).toEqual(false);
       expect(foundUser).toHaveProperty('doc');
       expect(foundUser.doc.firstName).toEqual('Jane');
 
+      let err;
       try {
         const cloneUser = await User.create({
           _id: mongoose.Types.ObjectId(),
@@ -145,10 +146,11 @@ describe('Typegoose', () => {
           gender: Genders.MALE,
           uniqueId: 'john-doe-20',
         });
-      } catch (err) {
-        expect(err.name).toEqual('MongoError');
-        expect(err.code).toEqual(11000);
+      } catch (e) {
+        err = e;
       }
+      expect(err.name).toEqual('MongoError');
+      expect(err.code).toEqual(11000);
     }
   });
 

@@ -7,7 +7,7 @@
     "start": "npm run build && node ./lib/typegoose.js",
     "build": "rimraf lib && tsc",
     "lint": "tslint --project tsconfig.json",
-    "test": "npm run lint && jest"
+    "test": "npm run lint && jest --runInBand"
   },
   "repository": {
     "type": "git",
@@ -23,10 +23,10 @@
     "collectCoverage": true,
     "coverageThreshold": {
       "global": {
-        "branches": 0,
-        "functions": 0,
-        "lines": 0,
-        "statements": 0
+        "branches": 70,
+        "functions": 70,
+        "lines": 70,
+        "statements": 70
       }
     },
     "coveragePathIgnorePatterns": [
@@ -41,7 +41,7 @@
     "transform": {
       "^.+\\.(ts$)": "ts-jest"
     },
-    "setupTestFrameworkScriptFile": "jest-extended",
+    "setupTestFrameworkScriptFile": "./__tests__/setup.ts",
     "testRegex": "(__tests__/.*(spec))\\.(ts)$",
     "moduleFileExtensions": [
       "ts",

@@ -3,8 +3,8 @@ import { closeDatabase, initDatabase } from '__tests__/utils/mongoConnect';
 import { InstanceType } from 'src/typegoose';
 
 describe('Extending schemas', () => {
-  beforeEach(() => initDatabase());
-  afterEach(() => closeDatabase());
+  beforeEach(async () => await initDatabase());
+  afterEach(async () => await closeDatabase());
 
   it('should save mongoose-schema-extend classes under one collection with _type', async () => {
     const germanShepherd = new GermanShepherdModel({ tailLength: 4, furColor: 'blue' });
