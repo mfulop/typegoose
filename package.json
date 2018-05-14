@@ -42,6 +42,7 @@
       "^.+\\.(ts$)": "ts-jest"
     },
     "setupTestFrameworkScriptFile": "./__tests__/setup.ts",
+    "testEnvironment": "node",
     "testRegex": "(__tests__/.*(spec))\\.(ts)$",
     "moduleFileExtensions": [
       "ts",
