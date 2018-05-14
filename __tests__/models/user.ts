@@ -18,7 +18,7 @@ import {
   instanceMethod,
   post,
   plugin,
-} from '../../typegoose';
+} from 'src/typegoose';
 
 export interface FindOrCreateResult<T> {
   created: boolean;

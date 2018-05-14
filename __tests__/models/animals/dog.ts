@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import * as tg from '../../../typegoose';
+import * as tg from 'src/typegoose';
 
 export class Dog extends tg.Typegoose {
   @tg.prop() _type: string;

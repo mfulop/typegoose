@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import * as tg from '../../../typegoose';
+import * as tg from 'src/typegoose';
 import { Dog } from './dog';
 
 export class GermanShepherd extends Dog {

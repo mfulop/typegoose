@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-import { prop, Typegoose, pre, post } from '../../typegoose';
+import { prop, Typegoose, pre, post } from 'src/typegoose';
 
 @pre<Dummy>('save', function(next) {
   this.text = 'saved';

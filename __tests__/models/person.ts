@@ -1,5 +1,5 @@
 import * as mongoose from 'mongoose';
-import * as tg from '../../typegoose';
+import * as tg from 'src/typegoose';
 import { Car } from './car';
 
 // add a pre-save hook to PersistentModel

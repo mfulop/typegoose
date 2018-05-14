@@ -1,11 +1,11 @@
-import { prop } from '../../typegoose';
+import { prop } from 'src/typegoose';
 
 export class JobType {
   @prop({ required: true })
   field: string;
 
   @prop({ required: true })
-  salery: number;
+  salary: number;
 }
 
 export class Job {

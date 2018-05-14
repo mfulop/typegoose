@@ -1,6 +1,6 @@
 import * as mongoose from 'mongoose';
 
-import { Typegoose, prop, pre } from '../../typegoose';
+import { Typegoose, prop, pre } from 'src/typegoose';
 
 @pre<Hook>('save', function(next) {
   if (this.isModified('shape')) {
