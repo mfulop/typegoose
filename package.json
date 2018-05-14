@@ -66,6 +66,8 @@
     "reflect-metadata": "^0.1.8"
   },
   "devDependencies": {
+    "mongoose": "^5.0.0",
+    "reflect-metadata": "^0.1.8",
     "@types/dotenv": "4.0.3",
     "@types/jest": "^22.2.3",
     "@types/lodash": "4.14.108",
