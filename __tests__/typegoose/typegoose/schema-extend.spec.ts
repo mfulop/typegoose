@@ -1,4 +1,4 @@
-import { Dog, GermanShepherd, GermanShepherdModel } from '__tests__/models/animals';
+import { Dog, DogModel, GermanShepherd, GermanShepherdModel } from '__tests__/models/animals';
 import { closeDatabase, initDatabase } from '__tests__/utils/mongoConnect';
 import { InstanceType } from 'src/typegoose';
 
@@ -20,6 +20,14 @@ describe('Extending schemas', () => {
     const germanShepherd = new GermanShepherdModel({ tailLength: 4, furColor: 'blue' });
     await germanShepherd.save();
     const dog: InstanceType<GermanShepherd | Dog> = await GermanShepherdModel.findOne({ tailLength: 4 });
+
+    expect(dog.getSound()).toEqual('im a shepherd');
+  });
+
+  it('should return an instance of GermanShepherd from Dog.find', async () => {
+    const germanShepherd = new GermanShepherdModel({ tailLength: 4, furColor: 'blue' });
+    await germanShepherd.save();
+    const dog: InstanceType<GermanShepherd | Dog> = await DogModel.findOne({ tailLength: 4 });
 
     expect(dog.getSound()).toEqual('im a shepherd');
   });

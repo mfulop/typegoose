@@ -12,10 +12,4 @@ export class GermanShepherd extends Dog {
   }
 }
 
-export const GermanShepherdModel = new GermanShepherd().getModelForClass(GermanShepherd, {
-    schemaOptions: {
-      collection: 'animals-extend-test',
-      discriminatorKey: '_type',
-    },
-    mongooseSchemaExtend: true,
-});
+export const GermanShepherdModel = new GermanShepherd().getModelForClass(GermanShepherd);

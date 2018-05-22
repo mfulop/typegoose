@@ -1,20 +1,14 @@
 import * as mongoose from 'mongoose';
 import * as tg from 'src/typegoose';
-
-export class Dog extends tg.Typegoose {
+import { Animal }  from './animal';
+export class Dog extends Animal {
   @tg.prop() _type: string;
   @tg.prop() tailLength: string;
 
   @tg.instanceMethod
   public getSound() {
-    return null;
+    return 'im a dog';
   }
 }
 
-export const DogModel = new Dog().getModelForClass(Dog, {
-    schemaOptions: {
-      collection: 'dogs-extend-test',
-      discriminatorKey: '_type',
-    },
-    mongooseSchemaExtend: true,
-});
+export const DogModel = new Dog().getModelForClass(Dog);

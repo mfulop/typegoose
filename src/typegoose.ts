@@ -20,7 +20,6 @@ export interface GetModelForClassOptions {
   existingMongoose?: mongoose.Mongoose;
   schemaOptions?: mongoose.SchemaOptions;
   existingConnection?: mongoose.Connection;
-  mongooseSchemaExtend?: boolean;
 }
 
 export class Typegoose {
@@ -28,11 +27,10 @@ export class Typegoose {
     existingMongoose,
     schemaOptions,
     existingConnection,
-    mongooseSchemaExtend,
   }: GetModelForClassOptions = {}) {
     const name = this.constructor.name;
     if (!models[name]) {
-      this.setModelForClass(t, { existingMongoose, schemaOptions, existingConnection, mongooseSchemaExtend });
+      this.setModelForClass(t, { existingMongoose, schemaOptions, existingConnection });
     }
 
     return models[name] as ModelType<this> & T;
@@ -42,28 +40,26 @@ export class Typegoose {
     existingMongoose,
     schemaOptions,
     existingConnection,
-    mongooseSchemaExtend,
   }: GetModelForClassOptions = {}) {
     const name = this.constructor.name;
 
-    // get schema of current model
-    let sch = this.buildSchema(name, schemaOptions);
     // get parents class name
-    let parentCtor = Object.getPrototypeOf(this.constructor.prototype).constructor;
-    // iterate trough all parents
-    while (parentCtor && parentCtor.name !== 'Typegoose' && parentCtor.name !== 'Object') {
-      // extend schema
-      sch = this.buildSchema(parentCtor.name, schemaOptions, sch, mongooseSchemaExtend);
-      // next parent
-      parentCtor = Object.getPrototypeOf(parentCtor.prototype).constructor;
+    const parentCtor = Object.getPrototypeOf(this.constructor.prototype).constructor;
+    let sch;
+
+    if (parentCtor.name !== 'Typegoose' && parentCtor.name !== 'Object') {
+      sch = this.buildSchema(name, schemaOptions, parentCtor.name);
+    } else {
+      sch = this.buildSchema(name, schemaOptions);
     }
 
+    // bind to mongoose connection
     let model = mongoose.model.bind(mongoose);
     if (existingConnection) {
-      model = existingConnection.model.bind(existingConnection);
-    } else if (existingMongoose) {
-      model = existingMongoose.model.bind(existingMongoose);
-    }
+        model = existingConnection.model.bind(existingConnection);
+      } else if (existingMongoose) {
+        model = existingMongoose.model.bind(existingMongoose);
+      }
 
     models[name] = model(name, sch);
     constructors[name] = this.constructor;
@@ -71,34 +67,33 @@ export class Typegoose {
     return models[name] as ModelType<this> & T;
   }
 
-  private buildSchema(name: string, schemaOptions, sch?: mongoose.Schema, mongooseSchemaExtend?: boolean) {
+  private buildSchema(name: string, schemaOptions, extendFrom?: string) {
     const Schema = mongoose.Schema;
+    let sch;
 
-    if (!sch) {
-      sch = schemaOptions ?
-        new Schema(schema[name], schemaOptions) :
-        new Schema(schema[name]);
-    } else {
-      if (mongooseSchemaExtend) {
-        sch = sch.extend(schema[name]);
+    if (extendFrom && schema[extendFrom]) {
+      let options;
+
+      if (schemaOptions) {
+        options = schemaOptions;
       } else {
-        sch.add(schema[name]);
+        // use schema options from parent
+        options = models[extendFrom] && models[extendFrom].schema ? models[extendFrom].schema.options : {};
       }
+      sch = new Schema(schema[extendFrom], options).extend(schema[name]);
+    } else {
+      sch = schemaOptions ?
+      new Schema(schema[name], schemaOptions) :
+      new Schema(schema[name]);
     }
 
-    const staticMethods = methods.staticMethods[name];
-    if (staticMethods) {
-      sch.statics = Object.assign(staticMethods, sch.statics || {});
-    } else {
-      sch.statics = sch.statics || {};
-    }
+    const staticMethods = methods.staticMethods[name] || {};
+    const parentStaticMethods = methods.staticMethods[extendFrom] || {};
+    sch.statics = Object.assign(parentStaticMethods, staticMethods, sch.statics || {});
 
-    const instanceMethods = methods.instanceMethods[name];
-    if (instanceMethods) {
-      sch.methods = Object.assign(instanceMethods, sch.methods || {});
-    } else {
-      sch.methods = sch.methods || {};
-    }
+    const instanceMethods = methods.instanceMethods[name] || {};
+    const parentInstanceMethods = methods.instanceMethods[extendFrom] || {};
+    sch.methods = Object.assign(parentInstanceMethods, instanceMethods, sch.methods || {});
 
     if (hooks[name]) {
       const preHooks = hooks[name].pre;
@@ -126,7 +121,6 @@ export class Typegoose {
         sch.virtual(key).set(value.set);
       }
     });
-
     return sch;
   }
 }
