@@ -58,6 +58,8 @@ export interface PropOptions extends BasePropOptions {
   ref?: any;
   /** Take the Path and try to resolve it to a Model */
   refPath?: string;
+  /** Type of id field of referenced documents (default: objectid) */
+  refType?: 'number' | 'string' | 'buffer' | 'objectid';
   /** 
    * Give the Property an alias in the output
    * Note: you should include the alias as a variable in the class, but not with a prop decorator
@@ -197,18 +199,35 @@ function baseProp(rawOptions: any, Type: any, target: any, key: string, whatis: 
     initAsObject(name, key);
   }
 
+  let refType;
+
+  switch ((rawOptions.itemsRefType || rawOptions.refType || 'objectid').toLowerCase()) {
+  case 'number':
+    refType = mongoose.Schema.Types.Number;
+    break;
+  case 'string':
+    refType = mongoose.Schema.Types.String;
+    break;
+  case 'buffer':
+    refType = mongoose.Schema.Types.Buffer;
+    break;
+  case 'objectid':
+  default:
+    refType = mongoose.Schema.Types.ObjectId;
+    break;
+  }
   const ref = rawOptions.ref;
   if (typeof ref === 'string') {
     schema[name][key] = {
       ...schema[name][key],
-      type: mongoose.Schema.Types.ObjectId,
+      type: refType,
       ref,
     };
     return;
   } else if (ref) {
     schema[name][key] = {
       ...schema[name][key],
-      type: mongoose.Schema.Types.ObjectId,
+      type: refType,
       ref: ref.name,
     };
     return;
@@ -218,14 +237,14 @@ function baseProp(rawOptions: any, Type: any, target: any, key: string, whatis: 
   if (typeof itemsRef === 'string') {
     schema[name][key][0] = {
       ...schema[name][key][0],
-      type: mongoose.Schema.Types.ObjectId,
+      type: refType,
       ref: itemsRef,
     };
     return;
   } else if (itemsRef) {
     schema[name][key][0] = {
       ...schema[name][key][0],
-      type: mongoose.Schema.Types.ObjectId,
+      type: refType,
       ref: itemsRef.name,
     };
     return;
@@ -235,7 +254,7 @@ function baseProp(rawOptions: any, Type: any, target: any, key: string, whatis: 
   if (refPath && typeof refPath === 'string') {
     schema[name][key] = {
       ...schema[name][key],
-      type: mongoose.Schema.Types.ObjectId,
+      type: refType,
       refPath,
     };
     return;
@@ -245,7 +264,7 @@ function baseProp(rawOptions: any, Type: any, target: any, key: string, whatis: 
   if (itemsRefPath && typeof itemsRefPath === 'string') {
     schema[name][key][0] = {
       ...schema[name][key][0],
-      type: mongoose.Schema.Types.ObjectId,
+      type: refType,
       refPath: itemsRefPath,
     };
     return;
@@ -395,7 +414,10 @@ export interface ArrayPropOptions extends BasePropOptions {
   itemsRef?: any;
   /** Same as {@link PropOptions.refPath}, only that it is for an array */
   itemsRefPath?: any;
+  /** Same as {@link PropOptions.refType}, only that it is for an array */
+  itemsRefType?: 'number' | 'string' | 'buffer' | 'objectid';
 }
+
 export interface MapPropOptions extends BasePropOptions {
   of?: any;
   mapDefault?: any;
@@ -427,4 +449,5 @@ export function arrayProp(options: ArrayPropOptions) {
 /**
  * Reference another Model
  */
-export type Ref<T> = T | mongoose.Schema.Types.ObjectId;
+export type RefType = number | string | mongoose.Schema.Types.ObjectId | Buffer;
+export type Ref<R, T extends RefType = mongoose.Schema.Types.ObjectId> = R | T;
