@@ -3,15 +3,18 @@ import * as mongoose from 'mongoose';
 import { arrayProp, prop, Ref, Typegoose } from '../../src/typegoose';
 
 export class RefTestBuffer extends Typegoose {
-  @prop() public _id: mongoose.Schema.Types.Buffer;
+  @prop()
+  public _id: mongoose.Schema.Types.Buffer;
 }
 
 export class RefTestNumber extends Typegoose {
-  @prop() public _id: number;
+  @prop()
+  public _id: number;
 }
 
 export class RefTestString extends Typegoose {
-  @prop() public _id: string;
+  @prop()
+  public _id: string;
 }
 
 export const RefTestBufferModel = new RefTestBuffer().getModelForClass(RefTestBuffer);

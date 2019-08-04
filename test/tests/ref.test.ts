@@ -73,8 +73,8 @@ export function suite() {
   });
 
   it('check reference with string _id', async () => {
-    const id1: string = 'testid1';
-    const id2: string = 'testid2';
+    const id1 = 'testid1';
+    const id2 = 'testid2';
 
     const refTypeTest = new RefTestModel();
     refTypeTest.refFieldString = id1;
@@ -143,7 +143,7 @@ export function suite() {
   });
 
   it('check typeguards', async () => {
-    const idFields = new RefTestModel({
+    const idFields = await RefTestModel.create({
       refField: mongoose.Types.ObjectId(),
       refArray: [mongoose.Types.ObjectId()],
       refFieldString: 'test1',
@@ -164,26 +164,52 @@ export function suite() {
     expect(isDocumentArray(idFields.refArrayNumber)).to.equal(false);
     expect(isDocumentArray(idFields.refArrayBuffer)).to.equal(false);
 
-    const populatedFields = new RefTestModel({
-      refField: new RefTestModel(),
-      refArray: [new RefTestModel(), new RefTestModel()],
-      refFieldString: new RefTestStringModel({ _id: 'test' }),
-      refArrayString: [new RefTestStringModel({ _id: 'test' }), new RefTestStringModel({ _id: 'test' })],
+    const { _id: populatedId } = await RefTestModel.create({
+      refField: await RefTestModel.create({}),
+      refArray: [await RefTestModel.create({}), await RefTestModel.create({})],
+      // this works, new RefTestStringModel({ _id: 'test1' }) would fail
+      refFieldString: await RefTestStringModel.create({ _id: 'test1' }),
+      refArrayString: [
+        await RefTestStringModel.create({ _id: 'test2' }),
+        await RefTestStringModel.create({ _id: 'test3' })
+      ],
       refFieldNumber: new RefTestNumberModel({ _id: 1234 }),
-      refArrayNumber: [new RefTestNumberModel({ _id: 1234 }), new RefTestNumberModel({ _id: 1234 })],
+      refArrayNumber: [new RefTestNumberModel({ _id: 5678 }), new RefTestNumberModel({ _id: 9876 })],
       refFieldBuffer: new RefTestBufferModel({ _id: Buffer.from([1, 2, 3, 4]) }),
-      refArrayBuffer: [new RefTestBufferModel({ _id: Buffer.from([1, 2, 3, 4]) }),
-        new RefTestBufferModel({ _id: Buffer.from([1, 2, 3, 4]) })]
+      refArrayBuffer: [
+        new RefTestBufferModel({ _id: Buffer.from([5, 6, 7, 8]) }),
+        new RefTestBufferModel({ _id: Buffer.from([9, 8, 7, 6]) })
+      ]
     });
 
-    expect(isDocument(populatedFields.refField)).to.equal(true);
-    expect(isDocument(populatedFields.refFieldString)).to.equal(true);
-    expect(isDocument(populatedFields.refFieldNumber)).to.equal(true);
-    expect(isDocument(populatedFields.refFieldBuffer)).to.equal(true);
+    const populate = ['', 'String', 'Number', 'Buffer'].map((f) => `refField${f} refArray${f}`).join(' ');
 
-    expect(isDocumentArray(populatedFields.refArray)).to.equal(true);
-    expect(isDocumentArray(populatedFields.refArrayString)).to.equal(true);
-    expect(isDocumentArray(populatedFields.refArrayNumber)).to.equal(true);
-    expect(isDocumentArray(populatedFields.refArrayBuffer)).to.equal(true);
+    const found = await RefTestModel.findById(populatedId);
+    // tslint:disable-next-line: no-console
+    console.log('found:', found);
+
+    const foundPopulated = await RefTestModel.findById(populatedId).populate(populate);
+    // tslint:disable-next-line: no-console
+    console.log('foundPopulated:', foundPopulated);
+
+    expect(foundPopulated.refArray).to.be.an('array');
+    expect(foundPopulated.refArrayString).to.be.an('array');
+    expect(foundPopulated.refArrayNumber).to.be.an('array');
+    expect(foundPopulated.refArrayBuffer).to.be.an('array');
+
+    expect(foundPopulated.refArray.length).to.equal(2);
+    expect(foundPopulated.refArrayString.length).to.equal(2);
+    expect(foundPopulated.refArrayNumber.length).to.equal(2);
+    expect(foundPopulated.refArrayBuffer.length).to.equal(2);
+
+    expect(isDocument(foundPopulated.refField)).to.equal(true);
+    expect(isDocument(foundPopulated.refFieldString)).to.equal(true);
+    expect(isDocument(foundPopulated.refFieldNumber)).to.equal(true);
+    expect(isDocument(foundPopulated.refFieldBuffer)).to.equal(true);
+
+    expect(isDocumentArray(foundPopulated.refArray)).to.equal(true);
+    expect(isDocumentArray(foundPopulated.refArrayString)).to.equal(true);
+    expect(isDocumentArray(foundPopulated.refArrayNumber)).to.equal(true);
+    expect(isDocumentArray(foundPopulated.refArrayBuffer)).to.equal(true);
   });
 }
