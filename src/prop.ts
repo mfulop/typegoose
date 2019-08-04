@@ -8,7 +8,7 @@ import { initAsArray, initAsObject, isNumber, isObject, isPrimitive, isString } 
 export type Func = (...args: any[]) => any;
 
 export type RequiredType = boolean | [boolean, string] | string | Func | [Func, string];
-export type RefType = number | string | mongoose.Schema.Types.ObjectId | Buffer;
+export type RefType = number | string | mongoose.Types.ObjectId | Buffer;
 export type RefSchemaType = typeof mongoose.Schema.Types.Number |
   typeof mongoose.Schema.Types.String |
   typeof mongoose.Schema.Types.Buffer |
@@ -205,34 +205,36 @@ function baseProp(rawOptions: any, Type: any, target: any, key: string, whatis: 
   }
 
   const ref = rawOptions.ref;
+  const refType = rawOptions.refType || mongoose.Schema.Types.ObjectId;
   if (typeof ref === 'string') {
     schema[name][key] = {
       ...schema[name][key],
-      type: rawOptions.refType || mongoose.Schema.Types.ObjectId,
+      type: refType,
       ref,
     };
     return;
   } else if (ref) {
     schema[name][key] = {
       ...schema[name][key],
-      type: rawOptions.refType || mongoose.Schema.Types.ObjectId,
+      type: refType,
       ref: ref.name,
     };
     return;
   }
 
   const itemsRef = rawOptions.itemsRef;
+  const itemsRefType = rawOptions.itemsRefType || mongoose.Schema.Types.ObjectId;
   if (typeof itemsRef === 'string') {
     schema[name][key][0] = {
       ...schema[name][key][0],
-      type: rawOptions.itemsRefType || mongoose.Schema.Types.ObjectId,
+      type: itemsRefType,
       ref: itemsRef,
     };
     return;
   } else if (itemsRef) {
     schema[name][key][0] = {
       ...schema[name][key][0],
-      type: rawOptions.itemsRefType || mongoose.Schema.Types.ObjectId,
+      type: itemsRefType,
       ref: itemsRef.name,
     };
     return;
@@ -242,7 +244,7 @@ function baseProp(rawOptions: any, Type: any, target: any, key: string, whatis: 
   if (refPath && typeof refPath === 'string') {
     schema[name][key] = {
       ...schema[name][key],
-      type: rawOptions.refType || mongoose.Schema.Types.ObjectId,
+      type: refType,
       refPath,
     };
     return;
@@ -252,7 +254,7 @@ function baseProp(rawOptions: any, Type: any, target: any, key: string, whatis: 
   if (itemsRefPath && typeof itemsRefPath === 'string') {
     schema[name][key][0] = {
       ...schema[name][key][0],
-      type: rawOptions.itemsRefType || mongoose.Schema.Types.ObjectId,
+      type: itemsRefType,
       refPath: itemsRefPath,
     };
     return;
@@ -437,4 +439,4 @@ export function arrayProp(options: ArrayPropOptions) {
 /**
  * Reference another Model
  */
-export type Ref<R, T extends RefType = mongoose.Schema.Types.ObjectId> = R | T;
+export type Ref<R, T extends RefType = mongoose.Types.ObjectId> = R | T;

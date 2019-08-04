@@ -1,5 +1,7 @@
 import { expect } from 'chai';
+import * as mongoose from 'mongoose';
 
+import { isDocument, isDocumentArray } from '../../src/typeguards';
 import { model as RefTestModel, RefTestBufferModel, RefTestNumberModel, RefTestStringModel } from '../models/refTests';
 
 /**
@@ -138,5 +140,50 @@ export function suite() {
     const { _id: refArrayId } = await new RefTestModel({ refArrayBuffer: [_id1, _id2] }).save();
     const { refArrayBuffer } = await RefTestModel.findById(refArrayId);
     expect(refArrayBuffer).to.deep.equal([_id1, _id2]);
+  });
+
+  it('check typeguards', async () => {
+    const idFields = new RefTestModel({
+      refField: mongoose.Types.ObjectId(),
+      refArray: [mongoose.Types.ObjectId()],
+      refFieldString: 'test1',
+      refArrayString: ['test1', 'test2'],
+      refFieldNumber: 1234,
+      refArrayNumber: [1234, 5678],
+      refFieldBuffer: Buffer.from([1, 2, 3, 4]),
+      refArrayBuffer: [Buffer.from([1, 2, 3, 4]), Buffer.from([5, 6, 7, 8])]
+    });
+
+    expect(isDocument(idFields.refField)).to.equal(false);
+    expect(isDocument(idFields.refFieldString)).to.equal(false);
+    expect(isDocument(idFields.refFieldNumber)).to.equal(false);
+    expect(isDocument(idFields.refFieldBuffer)).to.equal(false);
+
+    expect(isDocumentArray(idFields.refArray)).to.equal(false);
+    expect(isDocumentArray(idFields.refArrayString)).to.equal(false);
+    expect(isDocumentArray(idFields.refArrayNumber)).to.equal(false);
+    expect(isDocumentArray(idFields.refArrayBuffer)).to.equal(false);
+
+    const populatedFields = new RefTestModel({
+      refField: new RefTestModel(),
+      refArray: [new RefTestModel(), new RefTestModel()],
+      refFieldString: new RefTestStringModel({ _id: 'test' }),
+      refArrayString: [new RefTestStringModel({ _id: 'test' }), new RefTestStringModel({ _id: 'test' })],
+      refFieldNumber: new RefTestNumberModel({ _id: 1234 }),
+      refArrayNumber: [new RefTestNumberModel({ _id: 1234 }), new RefTestNumberModel({ _id: 1234 })],
+      refFieldBuffer: new RefTestBufferModel({ _id: Buffer.from([1, 2, 3, 4]) }),
+      refArrayBuffer: [new RefTestBufferModel({ _id: Buffer.from([1, 2, 3, 4]) }),
+        new RefTestBufferModel({ _id: Buffer.from([1, 2, 3, 4]) })]
+    });
+
+    expect(isDocument(populatedFields.refField)).to.equal(true);
+    expect(isDocument(populatedFields.refFieldString)).to.equal(true);
+    expect(isDocument(populatedFields.refFieldNumber)).to.equal(true);
+    expect(isDocument(populatedFields.refFieldBuffer)).to.equal(true);
+
+    expect(isDocumentArray(populatedFields.refArray)).to.equal(true);
+    expect(isDocumentArray(populatedFields.refArrayString)).to.equal(true);
+    expect(isDocumentArray(populatedFields.refArrayNumber)).to.equal(true);
+    expect(isDocumentArray(populatedFields.refArrayBuffer)).to.equal(true);
   });
 }
